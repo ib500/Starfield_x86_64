@@ -34,7 +34,7 @@ SRC     	:= src
 OBJ     	:= obj
 LIBDIR		:= libs
 INCDIRS		:= -I$(SRC) -I$(LIBDIR) -I$(LIBS) -Ilibs/fmod/inc
-LINKFLAGS 	:= -nostartfiles -static
+LINKFLAGS 	:= -nostartfiles -static -g
 
 ifdef RELEASE
 	CCFLAGS += -O3
