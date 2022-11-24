@@ -19,11 +19,6 @@ change_color_ini_size = . - change_color_ini
 move_cursor_ini: .ascii "\033[??;??H"
 move_cursor_ini_size = . - move_cursor_ini
 
-color_value: 
-.byte 2
-.byte 5
-.byte 6
-
 .section .bss
 
 X:
@@ -38,10 +33,12 @@ Y:
 .globl sys_render_ini
 .globl sys_render_delete_screen
 .globl sys_render_modify_string
+.globl write_in_terminal
+
 
 
 sys_render_modify_string:
-    mov [string], rax
+    mov [string], al
  ret
 
 ////////////////////////////////////////////
@@ -60,7 +57,7 @@ sys_render_write:
     
     mov rax, SYS_WRITE           /*RAX sys_write*/
     mov rdi, STDOUT              /*RDI File descriptor == code for the file*/
-    mov rsi, [string]            /*RSI Buffer for the writing*/
+    lea rsi, [string]            /*RSI Buffer for the writing*/
     mov rdx, string_size         /*Size of string to write*/
     syscall                      /*syscall must always be called in order to use system functions*/
 
