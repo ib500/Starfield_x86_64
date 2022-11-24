@@ -27,10 +27,10 @@ _main:
 
     call sys_render_ini
 
-    //mov rdi, 24
-    //call utils_divide_int
+    mov rdi, 24
+    call utils_divide_int
 
-    //call sys_render_modify_string
+    call sys_render_modify_string
 
     call sys_render_write
 
