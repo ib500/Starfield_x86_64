@@ -20,6 +20,6 @@ _start:
    
 _main:
 
-    call write_in_terminal
+    call sys_render_write
 
     ret
