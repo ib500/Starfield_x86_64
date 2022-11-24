@@ -11,7 +11,7 @@
 # $(5) : Compiler flags				: Flags for the compile command
 define COMPILE
 $(2) : $(3) $(4)
-	$(1) -c -o  $(2)  $(3)
+	$(1) -c -o  $(2)  $(3) $(5)
 endef
 ##CHANGE C/CPP TO O##############################################
 # For changing list of .c/.cpp files to .o and move them to the obj folder
@@ -28,6 +28,7 @@ endef
 ##MACROS FOR VARIADIC ELEMENTS###################################
 APP     	:= starfield 
 C 			:= gcc
+ASFLAGS		:= -g
 AS			:= gcc
 MKDIR   	:= mkdir -p
 SRC     	:= src
@@ -59,7 +60,7 @@ $(APP) : $(OBJSUBDIRS) $(ALLOBJ)
 	$(C) -o $(APP) $(patsubst $(SRC)%,$(OBJ)%,$(ALLOBJ) )  $(LINKFLAGS) $(LIBS)
 
 ##COMPILE ALL DETECTED C FILES####################################
-$(foreach F,$(ALLS),$(eval $(call COMPILE,$(AS),$(call S2O,$(F)),$(F))))
+$(foreach F,$(ALLS),$(eval $(call COMPILE,$(AS),$(call S2O,$(F)),$(F),,$(ASFLAGS))))
 
 ##INFO DEFINITION#################################################
 # Call "make info" on terminal to obtain values for the listed macros
