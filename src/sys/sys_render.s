@@ -4,20 +4,25 @@
 SYS_WRITE   =   1
 STDOUT      =   1
 
+X_DISPLACMENT = 6
+Y_DISPLACMENT = 9
+
 .section .data
+
+move_cursor: .ascii "\033[??;??H"
+move_cursor_size = . - move_cursor
 
 delete_screen: .ascii "\033[H\033[J"
 delete_screen_size = . - delete_screen
 
 
-string: .ascii "Hola mundo me muero!\n"
+string: .ascii "*"
 string_size = . - string
 
-change_color_ini: .ascii "\033[38;3;???;???;???m"
+change_color_ini: .ascii "\033[38;3;122;1;102m"
 change_color_ini_size = . - change_color_ini
 
-move_cursor_ini: .ascii "\033[??;??H"
-move_cursor_ini_size = . - move_cursor_ini
+
 
 .section .bss
 
@@ -33,37 +38,11 @@ Y:
 .globl sys_render_ini
 .globl sys_render_delete_screen
 .globl sys_render_modify_string
-.globl write_in_terminal
+.globl sys_render_entity
 
 
 
-sys_render_modify_string:
-    mov [string], al
- ret
 
-////////////////////////////////////////////
-//sys_render_write
-//writes what is inside the string variable on the terminal
-//INPUT:
-//  None
-//OUTPUT:
-//  None
-//MODIFIES:
-//  RAX,RDI,RSI,RDX
-//
-sys_render_write:
-    push rbp    
-    mov rbp,rsp
-    
-    mov rax, SYS_WRITE           /*RAX sys_write*/
-    mov rdi, STDOUT              /*RDI File descriptor == code for the file*/
-    lea rsi, [string]            /*RSI Buffer for the writing*/
-    mov rdx, string_size         /*Size of string to write*/
-    syscall                      /*syscall must always be called in order to use system functions*/
-
-    mov rsp, rbp
-    pop rbp
- ret
 ////////////////////////////////////////////
 //sys_render_ini
 //initialize render system
@@ -83,12 +62,73 @@ sys_render_ini:
     // call sys_change_color
     //call sys_render_delete_screen
 
-    //Write Ansi escape code to change screen color
-    // mov rax, SYS_WRITE              /*RAX sys_write*/
-    // mov rdi, STDOUT                 /*RDI File descriptor == code for the file*/
-    // lea rsi, [change_color_ini]     /*RSI Buffer for the writing*/
-    // mov rdx, change_color_ini_size  /*Size of string to write*/
-    // syscall                         /*syscall must always be called in order to use system functions*/
+   //Write Ansi escape code to change screen color
+
+    lea rsi, [change_color_ini]     /*RSI Buffer for the writing*/
+    mov rdx, change_color_ini_size  /*Size of string to write*/
+
+    call sys_render_write
+
+    mov rsp, rbp
+    pop rbp
+ ret
+
+////////////////////////////////////////////
+//sys_render_write
+//writes what is inside the string variable on the terminal
+//INPUT:
+//  RSI: pointer to the first byte of the string
+//  RSX: size of the string
+//OUTPUT:
+//  None
+//MODIFIES:
+//  RAX,RDI,RSI,RDX
+//
+sys_render_write:
+    push rbp    
+    mov rbp,rsp
+    
+    mov rax, SYS_WRITE           /*RAX sys_write*/
+    mov rdi, STDOUT              /*RDI File descriptor == code for the file*/
+    syscall                      /*syscall must always be called in order to use system functions*/
+
+    mov rsp, rbp
+    pop rbp
+ ret
+
+////////////////////////////////////////////
+//sys_render_ini
+//initialize render system
+//INPUT:
+//  None
+//OUTPUT:
+//  None
+//MODIFIES:
+//  RAX,RDI,RSI,RDX
+//
+sys_render_entity:
+    push rbp    
+    mov rbp,rsp
+
+    mov rdi, 23                /*shouldnt exixst later on*/
+    mov rcx, X_DISPLACMENT
+
+    call sys_render_update_cursor
+
+    mov rdi, 44                /*shouldnt exixst later on*/
+    mov rcx, Y_DISPLACMENT
+
+    call sys_render_update_cursor
+
+    lea rsi, [move_cursor]        /*RSI Buffer for the writing*/
+    mov rdx, move_cursor_size     /*Size of string to write*/
+
+    call sys_render_write
+
+    lea rsi, [string]        /*RSI Buffer for the writing*/
+    mov rdx, string_size     /*Size of string to write*/
+
+    call sys_render_write
 
     mov rsp, rbp
     pop rbp
@@ -137,63 +177,25 @@ sys_render_delete_screen:
     pop rbp
  ret
 
-////////////////////////////////////////////
-//sys_render_shift_cursor
-//Deletes entire screen
-//INPUT:
-//  None
-//OUTPUT:
-//  None
-//MODIFIES:
-//  RAX,RDI,RSI,RDX
-//
-sys_render_shift_cursor:
-    push rbp    
-    mov rbp,rsp
-
-    // mov rax, 2
-    // mov rbx, X_H
-    // call util_assign_to_variable
-
-    // mov rax, 0
-    // mov rbx, X_L
-    // call util_assign_to_variable
-
-    // mov rax, 6
-    // mov rbx, Y_H
-    // call util_assign_to_variable
-
-    // mov rax, 7
-    // mov rbx, Y_L
-    // call util_assign_to_variable
-
-    mov rax, SYS_WRITE                  /*RAX sys_write*/
-    mov rdi, STDOUT                     /*RDI File descriptor == code for the file*/
-    lea rsi, [move_cursor_ini]            /*RSI Buffer for the writing*/
-    mov rdx, move_cursor_ini_size         /*Size of string to write*/
-    syscall                             /*syscall must always be called in order to use system functions*/
-
-
-    mov rsp, rbp
-    pop rbp
- ret
 
 ////////////////////////////////////////////
-//sys_render_shift_cursor
+//sys_render_update_cursor
 //Deletes entire screen
 //INPUT:
-//  RCX: value to be loaded on the variable
-//  RDX: memory address of the variable
+//  RCX: Displacment of the variable to be updated
+//  RDI: new value
 //OUTPUT:
 //  None
 //MODIFIES:
 //  RCX,RDX
 //
-util_assign_to_variable:
+sys_render_update_cursor:
     push rbp    
     mov rbp,rsp
 
-    mov [rcx], rdx
+    lea rbx, [move_cursor]
+
+    call utils_update_string
 
     mov rsp, rbp
     pop rbp

@@ -29,7 +29,7 @@ endef
 APP     	:= starfield 
 C 			:= gcc
 ASFLAGS		:= -g
-AS			:= gcc
+AS			:= as
 MKDIR   	:= mkdir -p
 SRC     	:= src
 OBJ     	:= obj
