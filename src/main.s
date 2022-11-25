@@ -1,6 +1,7 @@
 .include "src/inc/header.inc"
 .include "src/inc/sys_render_header.inc"
 .include "src/inc/sys_physics_header.inc"
+.include "src/inc/man_entity_header.inc"
 .include "src/inc/utils_header.inc"
 
 
